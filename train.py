@@ -28,6 +28,13 @@ from pathlib import Path
 IMAGE_EXTENSIONS = {".bmp", ".jpeg", ".jpg", ".png", ".webp"}
 
 
+def configure_stdout() -> None:
+    try:
+        sys.stdout.reconfigure(line_buffering=True, write_through=True)
+    except AttributeError:
+        pass
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Train and export a MediaPipe gesture_recognizer.task model."
@@ -225,7 +232,8 @@ def install_epoch_loss_logger(gesture_recognizer: object, total_epochs: int):
                 )
             if "lr" in logs:
                 parts.append(f"lr={format_metric(logs.get('lr'))}")
-            print(" | ".join(parts), flush=True)
+            sys.stdout.write(" | ".join(parts) + "\n")
+            sys.stdout.flush()
 
     original_get_callbacks = gesture_recognizer.GestureRecognizer._get_callbacks
     original_fit = tf.keras.Model.fit
@@ -248,6 +256,7 @@ def install_epoch_loss_logger(gesture_recognizer: object, total_epochs: int):
 
 
 def main() -> int:
+    configure_stdout()
     args = parse_args()
     os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 

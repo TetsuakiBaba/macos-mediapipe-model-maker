@@ -40,7 +40,7 @@ dataset/
 ## 学習
 
 ```bash
-conda run -n mp-model-maker python train.py \
+conda run --no-capture-output -n mp-model-maker python train.py \
   --dataset path/to/dataset \
   --export-dir exported_model \
   --epochs 10 \
@@ -68,7 +68,7 @@ curl -L -o rps_data_sample.zip \
   https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/rps_data_sample.zip
 unzip -q -o rps_data_sample.zip
 
-conda run -n mp-model-maker python train.py \
+conda run --no-capture-output -n mp-model-maker python train.py \
   --dataset rps_data_sample \
   --export-dir exported_model_test \
   --epochs 1 \
