@@ -42,6 +42,7 @@ conda run -n "$ENV_NAME" python -m pip install \
   pandas \
   pillow \
   promise \
+  psutil \
   py-cpuinfo \
   pyarrow \
   pycocotools \
@@ -58,4 +59,4 @@ conda run -n "$ENV_NAME" python -m pip install \
   tqdm
 
 conda run -n "$ENV_NAME" python -m pip uninstall -y jax jaxlib >/dev/null 2>&1 || true
-conda run -n "$ENV_NAME" python -c "import tensorflow as tf; print(tf.__version__)"
+conda run -n "$ENV_NAME" python -c "import psutil; import tensorflow as tf; print(tf.__version__)"
