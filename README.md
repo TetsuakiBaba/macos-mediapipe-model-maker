@@ -39,6 +39,35 @@ dataset/
 
 ## 学習
 
+`train.py` 先頭の `TRAINING_CONFIG` を編集すると、引数なしで学習できます。
+普段使うデータセットや出力先はここに書いておくのがおすすめです。
+
+```python
+TRAINING_CONFIG = {
+    "dataset": Path("dataset"),
+    "export_dir": Path("exported_model"),
+    "model_name": "gesture_recognizer.task",
+    "epochs": 20,
+    "batch_size": 2,
+    "min_detection_confidence": 0.7,
+    "shuffle_preprocess": True,
+    "overwrite": False,
+}
+```
+
+実行:
+
+```bash
+conda run --no-capture-output -n mp-model-maker python train.py
+```
+
+既定では公式手順に合わせて、前処理時にシャッフルし、手検出のしきい値は
+`0.7` にしています。`Dataset.split()` はデータ順に分割するため、
+前処理時のシャッフルを無効にすると train / validation / test のラベル分布が
+偏り、認識精度が落ちることがあります。
+
+コマンドライン引数で一時的に上書きすることもできます。
+
 ```bash
 conda run --no-capture-output -n mp-model-maker python train.py \
   --dataset path/to/dataset \
@@ -46,6 +75,13 @@ conda run --no-capture-output -n mp-model-maker python train.py \
   --epochs 10 \
   --batch-size 2 \
   --overwrite
+```
+
+前処理シャッフルを明示的に無効化したい場合:
+
+```bash
+conda run --no-capture-output -n mp-model-maker python train.py \
+  --no-shuffle-preprocess
 ```
 
 学習後、次のファイルが出力されます。
@@ -86,14 +122,26 @@ python train.py --help
 
 主なオプション:
 
+- `--dataset`: データセットディレクトリ。引数なし実行では `TRAINING_CONFIG["dataset"]` を使用。
+- `--export-dir`: 出力先ディレクトリ。引数なし実行では `TRAINING_CONFIG["export_dir"]` を使用。
 - `--model-name`: 出力する `.task` ファイル名。既定値は `gesture_recognizer.task`。
 - `--epochs`: 学習 epoch 数。
 - `--batch-size`: バッチサイズ。
 - `--learning-rate`: 学習率。
 - `--layer-widths`: 追加する隠れ層。例: `--layer-widths 128,64`
-- `--min-detection-confidence`: 手検出の信頼度しきい値。
+- `--min-detection-confidence`: 手検出の信頼度しきい値。既定値は `0.7`。
+- `--shuffle-preprocess` / `--no-shuffle-preprocess`: 前処理時のシャッフル切り替え。既定値は `True`。
+- `--shuffle-train` / `--no-shuffle-train`: 学習データセットのシャッフル切り替え。
 - `--skip-eval`: テスト分割での評価を省略。
 - `--overwrite`: 既存の `export-dir` を削除して新規学習。
+
+## 精度が低いときの確認ポイント
+
+- `none` には「手は写っているが、どのカスタムジェスチャーでもない」画像を入れてください。手が写っていない画像は前処理で除外されます。
+- 各ラベルの枚数が極端に偏っていないか確認してください。
+- 実際に使うカメラ、距離、明るさ、手の向きに近い画像を学習データに含めてください。
+- まずは `shuffle_preprocess=True` と `min_detection_confidence=0.7` のまま学習してください。
+- `Usable landmark samples` が元画像数より大きく減っている場合、手検出に失敗している画像が多い可能性があります。
 
 ## 参考
 
